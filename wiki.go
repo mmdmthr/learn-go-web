@@ -81,5 +81,8 @@ func main() {
     http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/view/FrontPage", http.StatusFound)
+	})
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
