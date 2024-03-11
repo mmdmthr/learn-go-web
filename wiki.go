@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"text/template"
 )
 
@@ -56,8 +57,14 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html"))
+var pageLinkRegex = regexp.MustCompile(`\[([^\[\]]+)\]`)
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	// Replace instances of [PageName] with link to view page
+	p.Body = []byte(pageLinkRegex.ReplaceAllStringFunc(string(p.Body), func(match string) string {
+		pageName := strings.Trim(match, "[]") // Extract PageName
+		return "<a href=\"/view/" + pageName + "\">" + pageName + "</a>"
+	}))
 	err := templates.ExecuteTemplate(w, tmpl+".html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
